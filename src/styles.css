@@ -1,0 +1,474 @@
+/*
+  Ringbeat: design tokens first, then layout, then components.
+  The look borrows from Kandinsky's concentric circles: flat colour fields on a
+  cool ground, one saturated hue per ring, navy ink instead of black.
+*/
+:root {
+  color-scheme: light dark;
+  --font: 'Jost Variable', 'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --paper: #e4e9ee;
+  --paper-2: #d5dde6;
+  --ink: #16213a;
+  --ink-soft: #4a566e;
+  --line: #9eabbd;
+
+  --ring-1: #2b44d6; /* ultramarine */
+  --ring-2: #e5a100; /* saffron */
+  --ring-3: #c8327e; /* magenta */
+  --ring-4: #12866a; /* viridian */
+  --ring-5: #7b4fd6; /* violet */
+  --ring-6: #e0562c; /* cinnabar */
+  --focus: var(--ring-1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141a33;
+    --paper-2: #1e2748;
+    --ink: #e8ecf6;
+    --ink-soft: #a3aec9;
+    --line: #4b5680;
+
+    --ring-1: #7c90ff;
+    --ring-2: #f5be2e;
+    --ring-3: #f06aab;
+    --ring-4: #3fd0a6;
+    --ring-5: #a98bff;
+    --ring-6: #ff8359;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Layout ---------- */
+
+.app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) max(clamp(16px, 3.5vw, 40px), env(safe-area-inset-right))
+    max(32px, env(safe-area-inset-bottom)) max(clamp(16px, 3.5vw, 40px), env(safe-area-inset-left));
+}
+
+.masthead h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.masthead p {
+  margin: 0.5rem 0 0;
+  max-width: 44ch;
+  color: var(--ink-soft);
+}
+
+.layout {
+  display: grid;
+  gap: 28px;
+  margin-top: 20px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 440px);
+    gap: 48px;
+    align-items: start;
+  }
+}
+
+/* ---------- The dial ---------- */
+
+.stage {
+  position: relative;
+  width: min(100%, 640px);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+
+/* Declared after the base rule on purpose: same specificity, so order decides. */
+@media (min-width: 900px) {
+  .stage {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+.dial {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.dial .plate {
+  fill: var(--paper-2);
+}
+
+.dial .track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 0.35;
+}
+
+.dial .shape {
+  fill: currentColor;
+  fill-opacity: 0.07;
+  stroke: currentColor;
+  stroke-width: 0.45;
+  stroke-linejoin: round;
+}
+
+.dial .pulse {
+  fill: currentColor;
+}
+
+.dial .rest {
+  fill: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.dial .ring.is-muted {
+  opacity: 0.38;
+}
+
+.dial .playhead line {
+  stroke: var(--ink);
+  stroke-width: 0.55;
+  stroke-linecap: round;
+}
+
+.hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 21%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: transform 120ms ease-out;
+}
+
+.hub:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.hub svg {
+  width: 44%;
+  fill: currentColor;
+}
+
+/* Floating copy of the hub, shown only when the real one has scrolled out of view. */
+.fab {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 3px solid var(--paper);
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 0 0 1.5px var(--ink);
+  cursor: pointer;
+}
+
+.fab svg {
+  width: 44%;
+  fill: currentColor;
+}
+
+@media (min-width: 900px) {
+  .fab {
+    display: none;
+  }
+}
+
+/* ---------- Panels ---------- */
+
+.controls {
+  min-width: 0;
+}
+
+.panel {
+  padding: 16px 0 22px;
+  border-top: 1.5px solid var(--ink);
+}
+
+.panel h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0.25rem;
+}
+
+.panel-head h2 {
+  margin: 0;
+}
+
+.tempo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.bpm {
+  font-size: clamp(3.6rem, 9vw, 5.2rem);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  color: var(--ink-soft);
+}
+
+.slider {
+  display: grid;
+  grid-template-columns: 4.4rem minmax(0, 1fr) 2.4rem;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 38px;
+}
+
+.slider label {
+  color: var(--ink-soft);
+}
+
+.slider input[type='range'] {
+  --fill: 0%;
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Drawn by hand: browsers pick their own unfilled-track colour from accent-color,
+   which turned the saffron ring's sliders near-black. */
+.slider input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--accent, var(--ink)) var(--fill), var(--line) var(--fill));
+}
+
+.slider input[type='range']::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--accent, var(--ink));
+  box-shadow: 0 0 0 1px var(--accent, var(--ink));
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.slider input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.slider input[type='range']::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent, var(--ink));
+}
+
+.slider input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--accent, var(--ink));
+  box-shadow: 0 0 0 1px var(--accent, var(--ink));
+}
+
+.slider input[type='range']:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.slider output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.7rem;
+}
+
+.field label {
+  color: var(--ink-soft);
+}
+
+/* ---------- Rings list ---------- */
+
+.ring-row {
+  margin-block: 14px;
+  padding: 6px 0 8px 14px;
+  border-left: 5px solid var(--accent);
+}
+
+.ring-row.is-muted {
+  opacity: 0.6;
+}
+
+.ring-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.ring-head select {
+  margin-right: auto;
+}
+
+/* ---------- Controls ---------- */
+
+.controls button,
+.controls select {
+  font: inherit;
+  color: inherit;
+}
+
+.controls button {
+  padding: 0.45rem 1.05rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.controls button:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.controls button.quiet {
+  padding: 0.3rem 0.75rem;
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+
+.controls button.quiet:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: transparent;
+  color: var(--ink);
+}
+
+.controls button.quiet[aria-pressed='true'] {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.controls select {
+  padding: 0.4rem 0.7rem;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.hint {
+  max-width: 46ch;
+  margin: 0.8rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.status {
+  min-height: 1.5em;
+  margin: 0.4rem 0 0;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-left: 5px solid var(--ring-6);
+  background: var(--paper-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub {
+    transition: none;
+  }
+}
